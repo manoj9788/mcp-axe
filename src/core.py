@@ -65,9 +65,6 @@ async def scan_url_playwright(url: str, browser: str, headless: bool):
         axe_source = ensure_axe_js()
         await page.add_script_tag(content=axe_source)
         # Validate that axe actually got injected
-        #Now note that ensure_axe_js() is a synchronous function that returns a string, not a coroutine.
-        #But you're in an async context with Playwright, so Playwright may not have finished loading the page or the DOM
-        # before script injection.
         injected = await page.evaluate("typeof axe !== 'undefined'")
         if not injected:
             raise RuntimeError("Axe failed to inject into the page.")
@@ -83,6 +80,37 @@ async def scan_url_playwright(url: str, browser: str, headless: bool):
 
         return {
             "url": url,
+            "violations": result["violations"],
+            "screenshot": screenshot,
+        }
+
+
+async def scan_html(html_content: str, browser: str = "chrome", headless: bool = True):
+    """
+    Save provided HTML to a temp file and run Axe-core scan using Playwright.
+    """
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".html", delete=False) as tmp:
+        tmp.write(html_content)
+        tmp_path = tmp.name
+
+    async with async_playwright() as p:
+        bs = p.chromium if browser == "chrome" else p.firefox
+        browser_ctx = await bs.launch(headless=headless)
+        page = await browser_ctx.new_page()
+        await page.goto(f"file://{tmp_path}")
+
+        axe_source = ensure_axe_js()
+        await page.add_script_tag(content=axe_source)
+
+        result = await page.evaluate("async () => await axe.run()")
+
+        buffer = await page.screenshot(full_page=True)
+        screenshot = base64.b64encode(buffer).decode()
+
+        await browser_ctx.close()
+
+        return {
+            "html_file": tmp_path,
             "violations": result["violations"],
             "screenshot": screenshot,
         }
