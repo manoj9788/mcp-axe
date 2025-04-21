@@ -65,6 +65,9 @@ async def scan_url_playwright(url: str, browser: str, headless: bool):
         axe_source = ensure_axe_js()
         await page.add_script_tag(content=axe_source)
         # Validate that axe actually got injected
+        #Now note that ensure_axe_js() is a synchronous function that returns a string, not a coroutine.
+        #But you're in an async context with Playwright, so Playwright may not have finished loading the page or the DOM
+        # before script injection.
         injected = await page.evaluate("typeof axe !== 'undefined'")
         if not injected:
             raise RuntimeError("Axe failed to inject into the page.")
@@ -83,7 +86,6 @@ async def scan_url_playwright(url: str, browser: str, headless: bool):
             "violations": result["violations"],
             "screenshot": screenshot,
         }
-
 
 async def scan_html(html_content: str, browser: str = "chrome", headless: bool = True):
     """
@@ -114,3 +116,37 @@ async def scan_html(html_content: str, browser: str = "chrome", headless: bool =
             "violations": result["violations"],
             "screenshot": screenshot,
         }
+
+async def batch_scan(urls: list, engine: str = "playwright", browser: str = "chrome", headless: bool = True):
+    """
+    Run Axe-core scan on multiple URLs. Supports Playwright or Selenium engine.
+    """
+    results = {}
+
+    for url in urls:
+        try:
+            if engine == "selenium":
+                results[url] = await scan_url_selenium(url, browser, headless)
+            else:
+                results[url] = await scan_url_playwright(url, browser, headless)
+        except Exception as e:
+            results[url] = {"error": str(e)}
+
+    return results
+
+async def summarise_violations(result: dict):
+    """
+    Generate summary from Axe-core results.
+    """
+    if not result or "violations" not in result:
+        return "No violations found or invalid result format."
+
+    summary = []
+    for v in result["violations"]:
+        summary.append({
+            "id": v["id"],
+            "impact": v.get("impact", "unknown"),
+            "description": v["description"],
+            "nodes_affected": len(v["nodes"]),
+        })
+    return summary
