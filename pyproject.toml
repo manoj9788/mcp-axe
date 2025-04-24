@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mcp-axe"
-version = "0.1.0"
+version = "0.1.1"
 description = "MCP plugin for accessibility testing using Axe-core"
 authors = [
     { name="Manoj Kumar", email="your-email@example.com" }
@@ -20,14 +20,21 @@ dependencies = [
     "selenium>=4.10.0",
     "playwright>=1.44.0",
     "pyyaml>=6.0",
-    'pytest-asyncio>=0.26.0',
     "toml>=0.10.2",
     "requests>=2.28.0",
     "mcp>=1.6.0"
 ]
+[project.optional-dependencies]
+dev = [
+    "build",
+    "twine",
+    "pytest",
+    "pytest-asyncio"
+]
 
 [project.scripts]
 mcp-axe = "mcp_axe.cli:app"
+
 
 [tool.setuptools]
 packages = ["mcp_axe"]

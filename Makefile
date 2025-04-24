@@ -1,4 +1,5 @@
-# Makefile for MCP-Axe
+# MCP-Axe Makefile
+# Use this to run, test, and publish the project.
 
 # Default port for local dev
 PORT=8011

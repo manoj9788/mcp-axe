@@ -1,6 +1,7 @@
 import typer
 import json
 import asyncio
+import uvicorn
 from typing import List
 from mcp_axe.core import scan_url_selenium, scan_url_playwright, scan_html, summarise_violations, batch_scan
 
@@ -118,6 +119,10 @@ def summarize_cmd(
             typer.secho(f"Nodes affected: {item['nodes_affected']}")
             typer.echo("---")
 
+
+@app.command("run")
+def run_server(port: int = 8011):
+    uvicorn.run("mcp_axe.api:app", app_dir="src", port=port, reload=False)
 
 def _handle_output(result, source, engine, browser, output_json, output_html, save):
     """Helper function to handle output for scan commands."""

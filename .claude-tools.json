@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "mcp-axe": {
+      "command": "uvicorn",
+      "args": [
+        "mcp_axe.api:app",
+        "--app-dir", "src",
+        "--port", "8011"
+      ],
+      "workingDirectory": "./",
+      "port": 8011
+    }
+  }
+}
