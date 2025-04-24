@@ -122,6 +122,7 @@ def summarize_cmd(
 
 @app.command("run")
 def run_server(port: int = 8011):
+    """Run the MCP-Axe server"""
     uvicorn.run("mcp_axe.api:app", app_dir="src", port=port, reload=False)
 
 def _handle_output(result, source, engine, browser, output_json, output_html, save):

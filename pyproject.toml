@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mcp-axe"
-version = "0.1.1"
+version = "0.1.2"
 description = "MCP plugin for accessibility testing using Axe-core"
 authors = [
     { name="Manoj Kumar", email="your-email@example.com" }
