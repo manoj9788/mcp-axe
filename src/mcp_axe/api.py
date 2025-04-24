@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import List, Literal, Optional
 import asyncio
 
-from core import scan_url_selenium, scan_url_playwright, scan_html, batch_scan, summarise_violations
+from mcp_axe.core import scan_url_selenium, scan_url_playwright, scan_html, batch_scan, summarise_violations
 
 app = FastAPI(title="mcp-axe API")
 
@@ -47,7 +47,7 @@ class SummariseRequest(BaseModel):
 
 @app.post("/scan/summarise")
 async def summarise_violations_api(req: SummariseRequest):
-    return summarise_violations(req.result)
+    return await summarise_violations(req.result)
 
 
 # CLI entry point for terminal use

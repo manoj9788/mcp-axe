@@ -2,7 +2,7 @@ import typer
 import json
 import asyncio
 from typing import List
-from core import scan_url_selenium, scan_url_playwright, scan_html, summarise_violations, batch_scan
+from mcp_axe.core import scan_url_selenium, scan_url_playwright, scan_html, summarise_violations, batch_scan
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -97,7 +97,7 @@ def summarize_cmd(
         typer.secho(f"❌ Error reading input file: {str(e)}", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    summary = summarise_violations(result)
+    summary = asyncio.run(summarise_violations(result))
 
     if output_json or save:
         payload = json.dumps(summary, default=str, indent=2)
@@ -147,7 +147,7 @@ def _handle_output(result, source, engine, browser, output_json, output_html, sa
 
     # Display a summary if not outputting JSON
     if not output_json:
-        violations_summary = summarise_violations(result)
+        violations_summary = asyncio.run(summarise_violations(result))
         typer.secho(f"Found {len(violations_summary)} accessibility issues:", fg=typer.colors.BLUE, bold=True)
         for item in violations_summary:
             typer.secho(f"- {item['id']} ({item['impact']}): {item['nodes_affected']} instances",

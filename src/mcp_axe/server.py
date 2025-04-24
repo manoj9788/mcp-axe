@@ -1,7 +1,7 @@
 from mcp.server.fastmcp import FastMCP
 import mcp.types as types
 
-from core import scan_url_selenium, scan_url_playwright, scan_html,summarise_violations, batch_scan
+from mcp_axe.core import scan_url_selenium, scan_url_playwright, scan_html,summarise_violations, batch_scan
 
 server = FastMCP("axe", version="0.3.0")
 
@@ -47,8 +47,9 @@ async def batch_scan(
 ) -> types.Object(description="Batch scan results per URL", additionalProperties=True):
     return await batch_scan(urls, engine, browser, headless)
 
+
 @server.tool(name="summarise-violations")
-async def summarise_violations(
+async def summarise(
     result: types.Object(description="Raw Axe-core result with violations", additionalProperties=True)
 ) -> types.Array(
     description="Summarised view of violations",
@@ -61,6 +62,6 @@ async def summarise_violations(
         }
     )
 ):
-    return summarise_violations(result)
+    return await summarise_violations(result)
 
 app = server.fastapi_app

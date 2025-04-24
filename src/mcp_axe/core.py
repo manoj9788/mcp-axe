@@ -7,14 +7,13 @@ from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
-from axe_selenium_python import Axe
 from playwright.async_api import async_playwright
 
 AXE_STATIC = Path(__file__).parent / "static" / "axe.min.js"
 TTL_SECONDS = 24 * 3600  # refresh daily
 
-def ensure_axe_js():
-    if AXE_STATIC.exists() and time.time() - AXE_STATIC.stat().st_mtime < TTL_SECONDS:
+def ensure_axe_js(force=False):
+    if not force and AXE_STATIC.exists() and time.time() - AXE_STATIC.stat().st_mtime < TTL_SECONDS:
         return AXE_STATIC.read_text()
     api_url = "https://api.github.com/repos/dequelabs/axe-core/releases/latest"
     resp = requests.get(api_url, timeout=10)
@@ -27,6 +26,17 @@ def ensure_axe_js():
     AXE_STATIC.write_text(js_resp.text)
     return js_resp.text
 
+def inject_and_run_axe(driver, axe_source):
+    driver.execute_script(axe_source)
+    return driver.execute_async_script("""
+        var callback = arguments[arguments.length - 1];
+        try {
+            axe.run().then(results => callback(results)).catch(err => callback({ error: err.message }));
+        } catch (e) {
+            callback({ error: e.message });
+        }
+    """)
+
 async def scan_url_selenium(url: str, browser: str, headless: bool):
     opts = ChromeOptions() if browser == "chrome" else FirefoxOptions()
     if headless:
@@ -34,48 +44,37 @@ async def scan_url_selenium(url: str, browser: str, headless: bool):
     driver = webdriver.Chrome(options=opts) if browser == "chrome" else webdriver.Firefox(options=opts)
     try:
         driver.get(url)
-        axe = Axe(driver)
-        axe.inject()
-        results = axe.run()
+        axe_source = ensure_axe_js()
+        results = inject_and_run_axe(driver, axe_source)
+
+        if "error" in results:
+            raise RuntimeError(f"Axe injection or run failed: {results['error']}")
+
         screenshot = driver.get_screenshot_as_base64()
         return {
             "url": url,
-            "violations": results["violations"],
+            "violations": results.get("violations", []),
             "screenshot": screenshot,
         }
     finally:
         driver.quit()
 
 async def scan_url_playwright(url: str, browser: str, headless: bool):
-    """
-    Launch Playwright, inject Axe-core from our cache (or freshly fetched), run the scan,
-    take a full-page screenshot, and return violations + screenshot.
-    """
     async with async_playwright() as p:
-        # pick engine
         bs = p.chromium if browser == "chrome" else p.firefox
-
         browser_ctx = await bs.launch(headless=headless)
-
         page = await browser_ctx.new_page()
         await page.goto(url)
         await page.wait_for_load_state("domcontentloaded")
 
-        # inject axe-core
         axe_source = ensure_axe_js()
         await page.add_script_tag(content=axe_source)
-        # Validate that axe actually got injected
-        #Now note that ensure_axe_js() is a synchronous function that returns a string, not a coroutine.
-        #But you're in an async context with Playwright, so Playwright may not have finished loading the page or the DOM
-        # before script injection.
+
         injected = await page.evaluate("typeof axe !== 'undefined'")
         if not injected:
             raise RuntimeError("Axe failed to inject into the page.")
 
-        # run the audit
         result = await page.evaluate("async () => await axe.run()")
-
-        # capture screenshot
         buffer = await page.screenshot(full_page=True)
         screenshot = base64.b64encode(buffer).decode()
 
@@ -83,14 +82,11 @@ async def scan_url_playwright(url: str, browser: str, headless: bool):
 
         return {
             "url": url,
-            "violations": result["violations"],
+            "violations": result.get("violations", []),
             "screenshot": screenshot,
         }
 
 async def scan_html(html_content: str, browser: str = "chrome", headless: bool = True):
-    """
-    Save provided HTML to a temp file and run Axe-core scan using Playwright.
-    """
     with tempfile.NamedTemporaryFile(mode="w", suffix=".html", delete=False) as tmp:
         tmp.write(html_content)
         tmp_path = tmp.name
@@ -113,16 +109,12 @@ async def scan_html(html_content: str, browser: str = "chrome", headless: bool =
 
         return {
             "html_file": tmp_path,
-            "violations": result["violations"],
+            "violations": result.get("violations", []),
             "screenshot": screenshot,
         }
 
 async def batch_scan(urls: list, engine: str = "playwright", browser: str = "chrome", headless: bool = True):
-    """
-    Run Axe-core scan on multiple URLs. Supports Playwright or Selenium engine.
-    """
     results = {}
-
     for url in urls:
         try:
             if engine == "selenium":
@@ -131,16 +123,11 @@ async def batch_scan(urls: list, engine: str = "playwright", browser: str = "chr
                 results[url] = await scan_url_playwright(url, browser, headless)
         except Exception as e:
             results[url] = {"error": str(e)}
-
     return results
 
 async def summarise_violations(result: dict):
-    """
-    Generate summary from Axe-core results.
-    """
     if not result or "violations" not in result:
         return "No violations found or invalid result format."
-
     summary = []
     for v in result["violations"]:
         summary.append({
