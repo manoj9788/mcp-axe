@@ -115,7 +115,8 @@ make test
       "args": ["run", "--port", "9788"]
     }
   }
-}```
+}
+```
 
 ## Claude
 ```bash
