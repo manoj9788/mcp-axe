@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mcp-axe"
-version = "0.1.2"
+version = "0.1.4"
 description = "MCP plugin for accessibility testing using Axe-core"
 authors = [
     { name="Manoj Kumar", email="your-email@example.com" }
@@ -14,31 +14,45 @@ license = { file = "LICENSE" }
 requires-python = ">=3.8"
 
 dependencies = [
-    "typer>=0.9.0",
-    "fastapi>=0.100.0",
-    "uvicorn[standard]>=0.22.0",
-    "selenium>=4.10.0",
-    "playwright>=1.44.0",
-    "pyyaml>=6.0",
+    "typer>=0.15.2",
+    "fastapi>=0.115.12",
+    "uvicorn[standard]>=0.34.2",
+    "selenium>=4.31.0",
+    "playwright>=1.51.0",
+    "pyyaml>=6.0.2",
     "toml>=0.10.2",
-    "requests>=2.28.0",
+    "requests>=2.32.3",
     "mcp>=1.6.0"
 ]
+
 [project.optional-dependencies]
 dev = [
     "build",
     "twine",
-    "pytest",
-    "pytest-asyncio"
+    "pytest-asyncio",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=0.26.0",
+    "pytest-cov>=6.1.1",
+    "pytest-httpx>=0.35.0",
+    "pytest-playwright>=0.7.0",
+    "httpx>=0.28.1",
+    "sseclient-py>=1.8.0",
+    "flake8>=7.2.0",
+    "black>=25.1.0",
+    "isort>=6.0.1",
+    "mypy>=1.15.0",
+    "pre-commit>=4.2.0",
 ]
 
 [project.scripts]
-mcp-axe = "mcp_axe.cli:app"
-
+mcp-axe = "mcp_axe.cli:cli"
 
 [tool.setuptools]
-packages = ["mcp_axe"]
-package-dir = {"" = "src"}
+# no need to list packages by hand
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.setuptools.package-data]
 "mcp_axe" = ["static/axe.min.js"]

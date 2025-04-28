@@ -1,14 +1,13 @@
 {
   "mcpServers": {
     "mcp-axe": {
-      "command": "uvicorn",
-      "args": [
-        "mcp_axe.api:app",
-        "--app-dir", "src",
-        "--port", "8011"
-      ],
-      "workingDirectory": "./",
-      "port": 8011
+      "command": "mcp-axe",
+      "args": ["run", "--port", "9788"],
+      "workingDirectory": "${projectRoot}",
+      "port": 9788,
+      "transport": "sse",
+      "ssePath": "/sse",
+      "messagePath": "/messages"
     }
   }
 }

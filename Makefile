@@ -2,7 +2,7 @@
 # Use this to run, test, and publish the project.
 
 # Default port for local dev
-PORT=8011
+PORT=9788
 
 run:
 	uvicorn mcp_axe.api:app --reload --app-dir src --port $(PORT)

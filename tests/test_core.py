@@ -9,7 +9,7 @@ from mcp_axe.core import (
 
 @pytest.mark.asyncio
 async def test_scan_url_selenium_valid_url():
-    result = await scan_url_selenium("https://example.com", browser="chrome", headless=True)
+    result = await scan_url_selenium("https://google.com", browser="chrome", headless=True)
     assert isinstance(result, dict)
     assert "url" in result
     assert "violations" in result
@@ -17,7 +17,7 @@ async def test_scan_url_selenium_valid_url():
 
 @pytest.mark.asyncio
 async def test_scan_url_playwright_valid_url():
-    result = await scan_url_playwright("https://example.com", browser="chrome", headless=True)
+    result = await scan_url_playwright("https://google.com", browser="chrome", headless=True)
     assert isinstance(result, dict)
     assert "url" in result
     assert "violations" in result
@@ -33,8 +33,8 @@ async def test_scan_html_basic():
 
 @pytest.mark.asyncio
 async def test_batch_scan_mixed():
-    urls = ["https://example.com", "https://w3.org"]
-    result = await batch_scan(urls, engine="playwright", browser="chrome", headless=True)
+    urls = ["https://google.com", "https://w3.org"]
+    result = await batch_scan(urls, engine="selenium", browser="chrome", headless=True)
     assert isinstance(result, dict)
     for url in urls:
         assert "violations" in result[url] or "error" in result[url]
