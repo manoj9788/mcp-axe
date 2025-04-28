@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="mcp-axe",
-    version="0.1.4",
+    version="0.1.5",
     description="MCP plugin for accessibility testing using Axe-core",
     author="Manoj Kumar",
     author_email="your-email@example.com",
