@@ -1,13 +1,9 @@
 {
   "mcpServers": {
-    "mcp-axe": {
-      "command": "mcp-axe",
-      "args": ["run", "--port", "9788"],
-      "workingDirectory": "${projectRoot}",
-      "port": 9788,
-      "transport": "sse",
-      "ssePath": "/sse",
-      "messagePath": "/messages"
+    "axe-a11y": {
+      "command": "/Users/manojk/Documents/MCP-Git/mcp-axe/.venv/bin/python",
+      "args": ["-m", "mcp_axe"],
+      "cwd": "/Users/manojk/Documents/MCP-Git/mcp-axe"
     }
   }
 }

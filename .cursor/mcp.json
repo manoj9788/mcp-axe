@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "mcp-axe": {
-      "command": "mcp-axe",
-      "args": ["run", "--port", "9788"]
-    }
-  }
-}

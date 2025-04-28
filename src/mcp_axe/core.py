@@ -46,10 +46,8 @@ async def scan_url_selenium(url: str, browser: str, headless: bool):
         driver.get(url)
         axe_source = ensure_axe_js()
         results = inject_and_run_axe(driver, axe_source)
-
         if "error" in results:
             raise RuntimeError(f"Axe injection or run failed: {results['error']}")
-
         screenshot = driver.get_screenshot_as_base64()
         return {
             "url": url,
@@ -62,24 +60,19 @@ async def scan_url_selenium(url: str, browser: str, headless: bool):
 async def scan_url_playwright(url: str, browser: str, headless: bool):
     async with async_playwright() as p:
         bs = p.chromium if browser == "chrome" else p.firefox
-        browser_ctx = await bs.launch(headless=headless)
-        page = await browser_ctx.new_page()
+        ctx = await bs.launch(headless=headless)
+        page = await ctx.new_page()
         await page.goto(url)
         await page.wait_for_load_state("domcontentloaded")
-
         axe_source = ensure_axe_js()
         await page.add_script_tag(content=axe_source)
-
         injected = await page.evaluate("typeof axe !== 'undefined'")
         if not injected:
             raise RuntimeError("Axe failed to inject into the page.")
-
         result = await page.evaluate("async () => await axe.run()")
-        buffer = await page.screenshot(full_page=True)
-        screenshot = base64.b64encode(buffer).decode()
-
-        await browser_ctx.close()
-
+        buff = await page.screenshot(full_page=True)
+        screenshot = base64.b64encode(buff).decode()
+        await ctx.close()
         return {
             "url": url,
             "violations": result.get("violations", []),
@@ -90,23 +83,17 @@ async def scan_html(html_content: str, browser: str = "chrome", headless: bool =
     with tempfile.NamedTemporaryFile(mode="w", suffix=".html", delete=False) as tmp:
         tmp.write(html_content)
         tmp_path = tmp.name
-
     async with async_playwright() as p:
         bs = p.chromium if browser == "chrome" else p.firefox
-        browser_ctx = await bs.launch(headless=headless)
-        page = await browser_ctx.new_page()
+        ctx = await bs.launch(headless=headless)
+        page = await ctx.new_page()
         await page.goto(f"file://{tmp_path}")
-
         axe_source = ensure_axe_js()
         await page.add_script_tag(content=axe_source)
-
         result = await page.evaluate("async () => await axe.run()")
-
-        buffer = await page.screenshot(full_page=True)
-        screenshot = base64.b64encode(buffer).decode()
-
-        await browser_ctx.close()
-
+        buff = await page.screenshot(full_page=True)
+        screenshot = base64.b64encode(buff).decode()
+        await ctx.close()
         return {
             "html_file": tmp_path,
             "violations": result.get("violations", []),
@@ -126,14 +113,14 @@ async def batch_scan(urls: list, engine: str = "playwright", browser: str = "chr
     return results
 
 async def summarise_violations(result: dict):
-    if not result or "violations" not in result:
-        return "No violations found or invalid result format."
+    if "violations" not in result:
+        return []
     summary = []
     for v in result["violations"]:
         summary.append({
             "id": v["id"],
             "impact": v.get("impact", "unknown"),
             "description": v["description"],
-            "nodes_affected": len(v["nodes"]),
+            "nodes_affected": len(v.get("nodes", [])),
         })
     return summary

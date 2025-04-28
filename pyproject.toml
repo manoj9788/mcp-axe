@@ -45,14 +45,4 @@ dev = [
 ]
 
 [project.scripts]
-mcp-axe = "mcp_axe.cli:cli"
-
-[tool.setuptools]
-# no need to list packages by hand
-package-dir = { "" = "src" }
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.setuptools.package-data]
-"mcp_axe" = ["static/axe.min.js"]
+mcp-axe = "mcp_axe.server:main"
