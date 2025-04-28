@@ -1,9 +1,9 @@
 {
   "mcpServers": {
     "axe-a11y": {
-      "command": "/Users/manojk/Documents/MCP-Git/mcp-axe/.venv/bin/python",
+      "command": "/path/to/.venv/bin/python",
       "args": ["-m", "mcp_axe"],
-      "cwd": "/Users/manojk/Documents/MCP-Git/mcp-axe"
+      "cwd": "/path/to/mcp-axe"
     }
   }
 }
