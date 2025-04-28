@@ -41,7 +41,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "mcp-axe = mcp_axe.cli:cli",
+            "mcp-axe = mcp_axe.server:main",
         ],
     },
 )

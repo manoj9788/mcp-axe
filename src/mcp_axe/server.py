@@ -9,7 +9,7 @@ from mcp_axe.core import (
 )
 
 # Initialize
-server = FastMCP("axe", version="0.1.4")
+server = FastMCP("axe", version="0.1.5")
 
 class ScanResult(BaseModel):
     url: str = Field(description="Scanned URL")
