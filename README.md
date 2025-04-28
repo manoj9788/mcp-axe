@@ -104,4 +104,31 @@ curl -X POST http://localhost:9788/scan/batch \
 Run Test:
 make test
 ```
+### MCP Client
 
+## Cursor
+```bash
+{
+  "mcpServers": {
+    "mcp-axe": {
+      "command": "mcp-axe",
+      "args": ["run", "--port", "9788"]
+    }
+  }
+}```
+
+## Claude
+```bash
+{
+  "mcpServers": {
+    "mcp-axe": {
+      "command": "mcp-axe",
+      "args": ["run", "--port", "9788"],
+      "workingDirectory": "${projectRoot}",
+      "port": 9788,
+      "transport": "sse",
+      "ssePath": "/sse",
+      "messagePath": "/messages"
+    }
+  }
+}```

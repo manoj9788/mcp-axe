@@ -24,6 +24,7 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+.DS_Store
 MANIFEST
 
 # PyInstaller
@@ -176,3 +177,5 @@ cython_debug/
 #reports
 /reports
 *.html
+/.cursor
+.claude-tools.json
