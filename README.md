@@ -53,7 +53,11 @@ For AI clients (e.g. Claude Desktop, Cursor, VS Code MCP extension), configure 
 }
 ```
 
-Once the MCP server is running, you can invoke tools like:
+Once the MCP server is running, 
+
+you can prompt like `scan https://manojkk.com for accessibility issues` will invoke the scan-url tool.
+
+you can invoke tools like:
 - `scan-url` (params: `{ "url": "https://google.com" }`)
 - `scan-html` (params: `{ "html": "<h1>Hello</h1>" }`)
 - `scan-batch` (params: `{ "urls": ["https://a.com","https://b.com"] }`)
