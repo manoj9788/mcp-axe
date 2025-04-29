@@ -1,39 +1,47 @@
-# mcp-axe
+# mcp‑axe 
 
-[![PyPI version](https://img.shields.io/pypi/v/mcp-axe.svg)](https://pypi.org/project/mcp-axe/)
+[![PyPI version](https://img.shields.io/pypi/v/mcp-axe.svg)](https://pypi.org/project/mcp-axe/) [![License](https://img.shields.io/pypi/l/mcp-axe.svg)](LICENSE)
 
-# 🧪 mcp-axe: Accessibility Testing Plugin using Axe-core
+---
 
-`mcp-axe` is an MCP-compatible plugin for automated accessibility scanning using Deque's [axe-core](https://github.com/dequelabs/axe-core). It supports 
-both **Selenium** and **Playwright** engines and provides a CLI and FastAPI interface for scanning URLs, 
-raw HTML content, and batches.
+A **Model Context Protocol** (MCP) plugin for automated accessibility testing using [axe-core](https://github.com/dequelabs/axe-core). It lets MCP‑aware clients (Claude Desktop, Cursor, etc.) or your terminal run:
 
+- **Single URL scans**
+- **HTML string scans**
+- **Batch URL scans**
+- **Violation summarisation**
+
+All powered by Selenium under the hood.
 
 ## 📦 Installation
 
-### PyPI
-You could use mcp-axe from pypi package
-`https://pypi.org/project/mcp-axe/`
-
-
-
-## API Usage
-Clone this repo and install in editable mode:
+### From PyPI
 
 ```bash
-#optional
-#git clone https://github.com/yourname/mcp-axe.git
-#cd mcp-axe
+pip install mcp-axe
+```
+_Requires Python 3.8+._
 
+
+
+### Local / Development
+
+```bash
+git clone https://github.com/manoj9788/mcp-axe.git
+cd mcp-axe
 python3 -m venv .venv && source .venv/bin/activate
-pip install -e .
+pip install -e .[dev]
 ```
 
-### MCP Client
+---
 
-If you install direct from pip The configure Claude as below
+## 🔧 Usage
 
-```bash
+### MCP (JSON‑RPC) mode
+
+For AI clients (e.g. Claude Desktop, Cursor, VS Code MCP extension), configure your `<client>_config.json`:
+
+```json
 {
   "mcpServers": {
     "axe-a11y": {
@@ -44,8 +52,15 @@ If you install direct from pip The configure Claude as below
   }
 }
 ```
-If you are on development mode then configure claude as below
-```bash
+
+Once the MCP server is running, you can invoke tools like:
+- `scan-url` (params: `{ "url": "https://google.com" }`)
+- `scan-html` (params: `{ "html": "<h1>Hello</h1>" }`)
+- `scan-batch` (params: `{ "urls": ["https://a.com","https://b.com"] }`)
+- `summarise-violations` (params: `{ "result": <axe result> }`)
+
+### MCP local dev mode
+```json
 {
   "mcpServers": {
     "axe-a11y": {
@@ -58,26 +73,36 @@ If you are on development mode then configure claude as below
 ```
 
 
+### FastAPI REST mode (optional)
 
+Expose HTTP endpoints via:
 
-## CLI Usage
+```python
+from mcp_axe.server import app  # FastAPI instance
+import uvicorn
 
-### Scan a URL
-```bash
-mcp-axe scan-url https://broken-workshop.dequelabs.com --engine selenium --no-headless --save --output-json --output-html
+if __name__ == '__main__':
+    uvicorn.run(app, host='0.0.0.0', port=9788, reload=True)
 ```
 
-### Scan a local HTML file
+Then:
 ```bash
-mcp-axe scan-html path/to/your/file.html --browser chrome --no-headless --save --output-json --output-html
+curl -X POST http://localhost:9788/scan/url -H 'Content-Type: application/json' \
+  -d '{ "url": "https://google.com" }'
 ```
 
-### Batch scan multiple URLs:
-```bash
-mcp-axe batch-scan "https://broken-workshop.dequelabs.com,https://google.com" --engine selenium --browser chrome --headless --save --output-json
-```
+---
 
-### Summarize a saved report:
-```bash
-mcp-axe summarize report_selenium_chrome.json --output-json --save
-```
+## 🤝 Contributing
+
+1. Fork the repo
+2. Create a branch (`git checkout -b feature/xyz`)
+3. Commit your changes
+4. Open a PR
+
+---
+
+## 📜 License
+
+[MIT](LICENSE)
+

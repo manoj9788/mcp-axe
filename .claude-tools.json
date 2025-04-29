@@ -3,7 +3,7 @@
     "axe-a11y": {
       "command": "/path/to/.venv/bin/python",
       "args": ["-m", "mcp_axe"],
-      "cwd": "/path/to/mcp-axe"
+      "cwd": "/path/to/mcp-axe/src"
     }
   }
 }

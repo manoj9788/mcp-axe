@@ -48,11 +48,9 @@ async def scan_url_selenium(url: str, browser: str, headless: bool):
         results = inject_and_run_axe(driver, axe_source)
         if "error" in results:
             raise RuntimeError(f"Axe injection or run failed: {results['error']}")
-        screenshot = driver.get_screenshot_as_base64()
         return {
             "url": url,
             "violations": results.get("violations", []),
-            "screenshot": screenshot,
         }
     finally:
         driver.quit()
@@ -71,12 +69,10 @@ async def scan_url_playwright(url: str, browser: str, headless: bool):
             raise RuntimeError("Axe failed to inject into the page.")
         result = await page.evaluate("async () => await axe.run()")
         buff = await page.screenshot(full_page=True)
-        screenshot = base64.b64encode(buff).decode()
         await ctx.close()
         return {
             "url": url,
             "violations": result.get("violations", []),
-            "screenshot": screenshot,
         }
 
 async def scan_html(html_content: str, browser: str = "chrome", headless: bool = True):
@@ -92,15 +88,13 @@ async def scan_html(html_content: str, browser: str = "chrome", headless: bool =
         await page.add_script_tag(content=axe_source)
         result = await page.evaluate("async () => await axe.run()")
         buff = await page.screenshot(full_page=True)
-        screenshot = base64.b64encode(buff).decode()
         await ctx.close()
         return {
             "html_file": tmp_path,
             "violations": result.get("violations", []),
-            "screenshot": screenshot,
         }
 
-async def batch_scan(urls: list, engine: str = "playwright", browser: str = "chrome", headless: bool = True):
+async def batch_scan(urls: list, engine: str = "selenium", browser: str = "chrome", headless: bool = True):
     results = {}
     for url in urls:
         try:

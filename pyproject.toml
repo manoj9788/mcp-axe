@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mcp-axe"
-version = "0.1.5"
+version = "0.1.6"
 description = "MCP plugin for accessibility testing using Axe-core"
 authors = [
     { name="Manoj Kumar" }
@@ -15,6 +15,7 @@ requires-python = ">=3.8"
 
 dependencies = [
     "typer>=0.15.2",
+    "uuid",
     "fastapi>=0.115.12",
     "uvicorn[standard]>=0.34.2",
     "selenium>=4.31.0",
@@ -43,6 +44,11 @@ dev = [
     "mypy>=1.15.0",
     "pre-commit>=4.2.0",
 ]
+[tool.setuptools]
+package-dir = {"" = "src"}   # <-- THIS IS CRITICAL
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [project.scripts]
 mcp-axe = "mcp_axe.server:main"
