@@ -52,6 +52,15 @@ For AI clients (e.g. Claude Desktop, Cursor, VS Code MCP extension), configure 
   }
 }
 ```
+Or
+```json
+   "axe-a11y": {
+      "command": "uvx",
+      "args": [
+        "mcp-axe"
+      ]
+    }
+```
 
 Once the MCP server is running, 
 
